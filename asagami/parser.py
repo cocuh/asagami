@@ -17,7 +17,8 @@ from .token import (
   InlineTokenizer,
   BlockToken,
   TokenAttributes,
-  InlineToken)
+  InlineToken,
+)
 
 BlockGrammarRules = Dict[Pattern, BlockTokenizer]
 InlineGrammarRules = Dict[Pattern, InlineTokenizer]
