@@ -3,6 +3,7 @@ from typing import Dict, List, Match, Optional, Pattern, Set
 import re
 from collections import OrderedDict
 
+from asagami.document import DocumentMetaData
 from asagami.module import BlockTokenizer, InlineTokenizer
 from .module import BlockType, InlineType
 from .token import BlockToken, InlineToken, TokenAttributes
@@ -12,6 +13,20 @@ InlineGrammarRules = Dict[Pattern, InlineTokenizer]
 
 
 class Grammar:
+  block_attribute_pattern = re.compile(
+    r'^ {4}\.\. *(?P<name>[a-zA-Z0-9_]+) *: *(?P<value>.+?) *$',
+    re.MULTILINE,
+  )
+
+  inline_attribute_pattern = re.compile(
+    r'^(?P<name>[a-zA-Z0-9_]+) *= *(?P<value>[^,]+),?',
+  )
+
+  metadata_pattern = re.compile(
+    r'r^::(?P<name>[a-zA-Z0-9_]+) *: *(?P<value>.*)$',
+    re.MULTILINE,
+  )
+
   def gen_block_pattern(self, name: str) -> Pattern:
     pattern: Pattern = re.compile(
       r'^\.\. *' + f'{name}' + r' *'
@@ -28,15 +43,6 @@ class Grammar:
       + '\{(?P<value>[^\}]*)\}'
     )
     return pattern
-
-  block_attribute_pattern = re.compile(
-    r'^ {4}\.\. *(?P<name>[a-zA-Z0-9_]+) *: *(?P<value>.+?) *$',
-    re.MULTILINE,
-  )
-
-  inline_attribute_pattern = re.compile(
-    r'^(?P<name>[a-zA-Z0-9_]+)\s*=\s*(?P<value>[^,]+),?'
-  )
 
   def parse_block_attributes(self, attribute_text: str) -> TokenAttributes:
     attributes = OrderedDict()
@@ -70,8 +76,24 @@ class Grammar:
     return attributes
 
 
+class MetaDataParser:
+  def __init__(self, grammar: Grammar = Grammar()):
+    self.grammar = grammar
+
+  def parse(self, metadata: DocumentMetaData, text: str) -> DocumentMetaData:
+    text = text.lstrip('\n ')
+    while text:
+      match = self.grammar.metadata_pattern.match(text)
+      if match is None:
+        break
+      name = match['name']
+      value = match['value']
+      metadata.register(name, value)
+      text = text[match.end():].lstrip('\n ')
+    return metadata
+
+
 class BlockParser:
-  tokens: List[BlockToken]
   types: List[BlockType]
   rules: BlockGrammarRules
 
@@ -133,7 +155,6 @@ class BlockParser:
 
 
 class InlineParser:
-  tokens: List[InlineToken]
   types: List[InlineType]
   rules: InlineGrammarRules
 
@@ -142,7 +163,6 @@ class InlineParser:
       types: List[InlineType],
       grammar: Grammar = Grammar(),
   ):
-    self.tokens = []
     self.types = types
     self.rules = self._gen_rules(grammar, types)
 
@@ -196,5 +216,8 @@ class InlineParser:
 
 
 class Parser:
-  def __init__(self):
+  def __init__(self, custom_modules):
     pass
+
+  def parse(self, text: str):
+    MetaDataParser()

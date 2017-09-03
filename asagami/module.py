@@ -1,6 +1,7 @@
 from typing import Any, Callable, List, Match, Optional, Pattern
 
 import abc
+import re
 
 from .document import DocumentEnvironment
 from .token import (
@@ -112,3 +113,26 @@ class InlineRenderer(metaclass=abc.ABCMeta):
 
   def render_html(self, token: InlineToken, env: DocumentEnvironment) -> Any:
     pass
+
+
+class ParagraphModule(Module):
+  def get_name(self):
+    return 'paragraph'
+
+  def get_block_types(self):
+    return [ParagraphBlockType()]
+
+
+class ParagraphBlockType(BlockType):
+  def get_name(self):
+    return 'paragraph'
+  
+  def get_patterns(self):
+    return [
+      re.compile(r'^(?P<body>.*(?!=.*\n\n))')
+    ]
+  # TODO: first koko
+  
+
+class ParagraphBlockRenderer(BlockRenderer):
+  pass
