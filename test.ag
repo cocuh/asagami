@@ -1,0 +1,27 @@
+::documentclass: none
+::usemodule: CodeInlineModule
+::usemodule: CodeBlockModule
+start hogehoge:code:{text}youjo:code{lang:python}:{text}aa
+piyohogepiyohoge:code:{first }:code:{ second}:code:{thi rd}
+
+.. code
+    import hoge
+
+hogehoge
+
+
+.. code
+    .. lang: python
+    .. schema: molokai
+    print('hello youjo')
+
+    hoge
+
+
+no
+break
+
+
+with
+
+break
