@@ -1,20 +1,23 @@
 from typing import (
   List,
-  ClassVar,
-  Type,
   Dict,
   Pattern,
-  Match, Optional, Set)
-
-from .document import (
-  Document,
-  DocumentEnvironment,
+  Match,
+  Optional,
+  Set,
 )
-from .module import Module, BlockModule, InlineModule
-from .token import BlockTokenizer, InlineTokenizer, BlockToken, InlineToken, TokenAttributes
+
 import abc
+from collections import OrderedDict
 import re
-from collections import OrderedDict, defaultdict
+
+from .module import BlockModule
+from .token import (
+  BlockTokenizer,
+  InlineTokenizer,
+  BlockToken,
+  TokenAttributes,
+)
 
 BlockGrammarRules = Dict[Pattern, BlockTokenizer]
 InlineGrammarRules = Dict[Pattern, InlineTokenizer]

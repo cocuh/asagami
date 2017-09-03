@@ -1,8 +1,8 @@
 from typing import (
   List,
   Pattern,
-  Callable,
 )
+
 import abc
 
 from .token import (

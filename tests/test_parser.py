@@ -1,5 +1,5 @@
-from unittest import TestCase
-from unittest import mock
+from unittest import TestCase, mock
+
 from nose.tools import eq_
 
 import asagami.parser
