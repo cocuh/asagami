@@ -5,13 +5,23 @@ from nose.tools import eq_
 import asagami.parser
 
 
-class TestParseBlockAttributes(TestCase):
+class TestGrammerGenInlinePattern(TestCase):
   def setUp(self):
-    self.grammer = asagami.parser.Grammar()
+    self.grammar = asagami.parser.Grammar()
 
   def test_it(self):
-    result = asagami.parser.parse_block_attributes(
-      self.grammer,
+    pattern = self.grammar.gen_inline_pattern('youjo')
+    self.assertIsNotNone(pattern.match(':youjo:{}'))
+    self.assertIsNotNone(pattern.match(':youjo:{hoge}'))
+    self.assertIsNone(pattern.match(':youo:{hoge}'))
+
+
+class TestGrammarParseBlockAttributes(TestCase):
+  def setUp(self):
+    self.grammar = asagami.parser.Grammar()
+
+  def test_it(self):
+    result = self.grammar.parse_block_attributes(
       '\n'
       '    .. hoge: ninja   \n'
       '    ..piyo: youjo\n'
@@ -21,6 +31,20 @@ class TestParseBlockAttributes(TestCase):
     eq_(result['hoge'], 'ninja')
     eq_(result['piyo'], 'youjo')
     eq_(result['bad_ninja'], 'good_ninja')
+
+
+class TestGrammarParseInlineAttributes(TestCase):
+  def setUp(self):
+    self.grammar = asagami.parser.Grammar()
+
+  def test_it(self):
+    result = self.grammar.parse_inline_attributes(
+      '{hoge=piyo,youjo=ninja,href="http://dakko.site/"}'
+    )
+    eq_(len(result), 3)
+    eq_(result['hoge'], 'piyo')
+    eq_(result['youjo'], 'ninja')
+    eq_(result['href'], '"http://dakko.site/"')
 
 
 class TestBlockParser(TestCase):
@@ -149,3 +173,103 @@ class TestBlockParser(TestCase):
       'youjo love code\n'
       'ninja love code'
     )
+
+
+class TestInlineParser(TestCase):
+  def test_it(self):
+    from asagami.module import InlineModule
+
+    class YoujoModule(InlineModule):
+      def get_name(self):
+        return 'youjo'
+
+      def get_patterns(self):
+        return []
+
+      def get_tokenizer(self):
+        return None
+
+    modules = [
+      YoujoModule(),
+    ]
+    grammer = asagami.parser.Grammar()
+    parser = asagami.parser.InlineParser(modules, grammer)
+    tokens = parser.parse(
+      ':youjo:{hoge}'
+    )
+    eq_(
+      len(tokens),
+      1,
+    )
+    token = tokens[0]
+    eq_(token.name, 'youjo')
+    eq_(token.value, 'hoge')
+    eq_(token.attributes, {})
+
+  def test_attribtues(self):
+    from asagami.module import InlineModule
+
+    class YoujoModule(InlineModule):
+      def get_name(self):
+        return 'youjo'
+
+      def get_patterns(self):
+        return []
+
+      def get_tokenizer(self):
+        return None
+
+    modules = [
+      YoujoModule(),
+    ]
+    grammer = asagami.parser.Grammar()
+    parser = asagami.parser.InlineParser(modules, grammer)
+    tokens = parser.parse(
+      ':youjo{ninja=hoge,onaka=guruguru}:{hoge}'
+    )
+    eq_(
+      len(tokens),
+      1,
+    )
+    token = tokens[0]
+    eq_(token.name, 'youjo')
+    eq_(token.value, 'hoge')
+    eq_(token.attributes, {'ninja': 'hoge', 'onaka': 'guruguru'})
+
+  def test_tokenizer(self):
+    from asagami.module import InlineModule
+    import re
+
+    tokenizer = mock.MagicMock()
+
+    class YoujoModule(InlineModule):
+      def get_name(self):
+        return 'youjo'
+
+      def get_patterns(self):
+        return [
+          re.compile('^\$(?P<value>[^\$]+)\$')
+        ]
+
+      def get_tokenizer(self):
+        return tokenizer
+
+    modules = [
+      YoujoModule(),
+    ]
+    grammer = asagami.parser.Grammar()
+    parser = asagami.parser.InlineParser(modules, grammer)
+    tokens = parser.parse(
+      ':youjo:{hoge}$\mathcal{A}(\mathcal{D})$'
+    )
+    eq_(
+      len(tokens),
+      2,
+    )
+    token = tokens[0]
+    eq_(token.name, 'youjo')
+    eq_(token.value, 'hoge')
+    eq_(token.attributes, {})
+
+    tokenizer.assert_called_once()
+    eq_(tokenizer.call_args[0][0]['value'], '\mathcal{A}(\mathcal{D})')
