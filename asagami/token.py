@@ -1,5 +1,6 @@
+from typing import Dict, List, Union
+
 from collections import namedtuple
-from typing import Callable, Match, Union, List, Dict
 
 TokenAttributes = Dict[str, Union[str, List[str]]]
 
@@ -20,16 +21,3 @@ InlineToken = namedtuple(
     'attributes',
   ],
 )
-
-BlockTokenizer = Callable[
-  [
-    Match,
-  ],
-  BlockToken,
-]
-InlineTokenizer = Callable[
-  [
-    Match,
-  ],
-  InlineToken,
-]

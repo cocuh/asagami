@@ -1,17 +1,41 @@
-from typing import (
-  List,
-  Pattern,
-)
+from typing import Any, Callable, List, Match, Optional, Pattern
 
 import abc
 
-from asagami.document import DocumentEnvironment
+from .document import DocumentEnvironment
 from .token import (
-  BlockTokenizer,
-  InlineTokenizer,
   BlockToken,
   InlineToken,
 )
+
+BlockTokenizer = Callable[
+  [
+    Match,
+  ],
+  BlockToken,
+]
+InlineTokenizer = Callable[
+  [
+    Match,
+  ],
+  InlineToken,
+]
+
+BlockTransformer = Callable[
+  [
+    DocumentEnvironment,
+    BlockToken,
+  ],
+  None,
+]
+
+InlineTransformer = Callable[
+  [
+    DocumentEnvironment,
+    InlineToken,
+  ],
+  None,
+]
 
 
 class Module(metaclass=abc.ABCMeta):
@@ -33,6 +57,9 @@ class BlockType(metaclass=abc.ABCMeta):
   def get_tokenizer(self) -> BlockTokenizer:
     pass
 
+  def get_transformer(self) -> Optional[BlockTransformer]:
+    return None
+
 
 class InlineType(metaclass=abc.ABCMeta):
   @abc.abstractmethod
@@ -47,25 +74,8 @@ class InlineType(metaclass=abc.ABCMeta):
   def get_tokenizer(self) -> InlineTokenizer:
     pass
 
-
-class BlockTransformer(metaclass=abc.ABCMeta):
-  @abc.abstractmethod
-  def get_name(self):
-    pass
-
-  @abc.abstractmethod
-  def transform(self, env: DocumentEnvironment, token: BlockToken):
-    pass
-
-
-class InlineTransformer(metaclass=abc.ABCMeta):
-  @abc.abstractmethod
-  def get_name(self):
-    pass
-
-  @abc.abstractmethod
-  def transform(self, env: DocumentEnvironment, token: InlineToken):
-    pass
+  def get_transformer(self) -> Optional[InlineTransformer]:
+    return None
 
 
 class BlockRenderer(metaclass=abc.ABCMeta):
@@ -74,7 +84,7 @@ class BlockRenderer(metaclass=abc.ABCMeta):
     pass
 
   @abc.abstractmethod
-  def render(self, token: BlockToken) -> str:
+  def render(self, token: BlockToken) -> Any:
     pass
 
 
@@ -84,5 +94,5 @@ class InlineRenderer(metaclass=abc.ABCMeta):
     pass
 
   @abc.abstractmethod
-  def render(self, token: BlockToken) -> str:
+  def render(self, token: InlineToken) -> Any:
     pass

@@ -1,23 +1,11 @@
-from typing import (
-  List,
-  Dict,
-  Pattern,
-  Match,
-  Optional,
-  Set,
-)
+from typing import Dict, List, Match, Optional, Pattern, Set
 
-from collections import OrderedDict
 import re
+from collections import OrderedDict
 
+from asagami.module import BlockTokenizer, InlineTokenizer
 from .module import BlockType, InlineType
-from .token import (
-  BlockTokenizer,
-  InlineTokenizer,
-  BlockToken,
-  TokenAttributes,
-  InlineToken,
-)
+from .token import BlockToken, InlineToken, TokenAttributes
 
 BlockGrammarRules = Dict[Pattern, BlockTokenizer]
 InlineGrammarRules = Dict[Pattern, InlineTokenizer]
