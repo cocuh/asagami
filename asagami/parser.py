@@ -7,11 +7,10 @@ from typing import (
   Set,
 )
 
-import abc
 from collections import OrderedDict
 import re
 
-from .module import BlockModule, InlineModule
+from .module import BlockType, InlineType
 from .token import (
   BlockTokenizer,
   InlineTokenizer,
@@ -67,7 +66,7 @@ class Grammar:
 
   def parse_inline_attributes(self, attribute_text: str) -> TokenAttributes:
     attributes = OrderedDict()
-    if not attribute_text: # empty string
+    if not attribute_text:  # empty string
       return attributes
     assert attribute_text.startswith('{')
     assert attribute_text.endswith('}')
@@ -83,36 +82,30 @@ class Grammar:
     return attributes
 
 
-class Parser(metaclass=abc.ABCMeta):
-  @abc.abstractmethod
-  def parse(self, text: str):
-    raise NotImplementedError()
-
-
-class BlockParser(Parser):
+class BlockParser:
   tokens: List[BlockToken]
-  modules: List[BlockModule]
+  types: List[BlockType]
   rules: BlockGrammarRules
 
   def __init__(
       self,
-      modules: List[BlockModule],
+      block_types: List[BlockType],
       grammar: Grammar = Grammar(),
   ):
-    self.modules = modules
-    self.rules = self._gen_rules(grammar, modules)
+    self.types = block_types
+    self.rules = self._gen_rules(grammar, block_types)
 
   @classmethod
-  def _gen_rules(cls, grammer: Grammar, modules: List[BlockModule]) -> BlockGrammarRules:
+  def _gen_rules(cls, grammer: Grammar, types: List[BlockType]) -> BlockGrammarRules:
     rules = OrderedDict()
-    for m in modules:
-      tokenizer = m.get_tokenizer()
-      for pattern in m.get_patterns():
+    for t in types:
+      tokenizer = t.get_tokenizer()
+      for pattern in t.get_patterns():
         rules[pattern] = tokenizer
 
     names: Set[str] = set([
-      m.get_name()
-      for m in modules
+      t.get_name()
+      for t in types
     ])
     for name in names:
       pattern = grammer.gen_block_pattern(name)
@@ -151,31 +144,31 @@ class BlockParser(Parser):
     return tokens
 
 
-class InlineParser(Parser):
+class InlineParser:
   tokens: List[InlineToken]
-  modules: List[InlineModule]
+  types: List[InlineType]
   rules: InlineGrammarRules
 
   def __init__(
       self,
-      modules: List[InlineModule],
+      types: List[InlineType],
       grammar: Grammar = Grammar(),
   ):
     self.tokens = []
-    self.modules = modules
-    self.rules = self._gen_rules(grammar, modules)
+    self.types = types
+    self.rules = self._gen_rules(grammar, types)
 
   @classmethod
-  def _gen_rules(cls, grammer: Grammar, modules: List[InlineModule]) -> InlineGrammarRules:
+  def _gen_rules(cls, grammer: Grammar, types: List[InlineType]) -> InlineGrammarRules:
     rules = OrderedDict()
-    for m in modules:
-      tokenizer = m.get_tokenizer()
-      for pattern in m.get_patterns():
+    for t in types:
+      tokenizer = t.get_tokenizer()
+      for pattern in t.get_patterns():
         rules[pattern] = tokenizer
 
     names: Set[str] = set([
-      m.get_name()
-      for m in modules
+      t.get_name()
+      for t in types
     ])
     for name in names:
       pattern = grammer.gen_inline_pattern(name)
@@ -212,3 +205,5 @@ class InlineParser(Parser):
       else:
         raise RuntimeError('Infinite loop at: %s' % text)
     return tokens
+
+

@@ -17,7 +17,7 @@ class Module(metaclass=abc.ABCMeta):
     pass
 
 
-class BlockModule(metaclass=abc.ABCMeta):
+class BlockType(metaclass=abc.ABCMeta):
   @abc.abstractmethod
   def get_name(self) -> str:
     pass
@@ -31,7 +31,7 @@ class BlockModule(metaclass=abc.ABCMeta):
     pass
 
 
-class InlineModule(metaclass=abc.ABCMeta):
+class InlineType(metaclass=abc.ABCMeta):
   @abc.abstractmethod
   def get_name(self):
     pass

@@ -49,9 +49,9 @@ class TestGrammarParseInlineAttributes(TestCase):
 
 class TestBlockParser(TestCase):
   def test_it(self):
-    from asagami.module import BlockModule
+    from asagami.module import BlockType
 
-    class YoujoModule(BlockModule):
+    class YoujoModule(BlockType):
       def get_name(self):
         return 'youjo'
 
@@ -82,9 +82,9 @@ class TestBlockParser(TestCase):
     eq_(token.attributes['huga'], 'gegege')
 
   def test_multiple_module(self):
-    from asagami.module import BlockModule
+    from asagami.module import BlockType
 
-    class YoujoModule(BlockModule):
+    class YoujoModule(BlockType):
       def get_name(self):
         return 'youjo'
 
@@ -94,7 +94,7 @@ class TestBlockParser(TestCase):
       def get_tokenizer(self):
         return None
 
-    class NinjaModule(BlockModule):
+    class NinjaModule(BlockType):
       def get_name(self):
         return 'ninja'
 
@@ -131,11 +131,11 @@ class TestBlockParser(TestCase):
     eq_(tokens[2].attributes['huga'], 'gegege')
 
   def test_tokenizer(self):
-    from asagami.module import BlockModule
+    from asagami.module import BlockType
     import re
     tokenizer = mock.MagicMock()
 
-    class YoujoModule(BlockModule):
+    class YoujoModule(BlockType):
       def get_name(self):
         return 'youjo'
 
@@ -177,9 +177,9 @@ class TestBlockParser(TestCase):
 
 class TestInlineParser(TestCase):
   def test_it(self):
-    from asagami.module import InlineModule
+    from asagami.module import InlineType
 
-    class YoujoModule(InlineModule):
+    class YoujoModule(InlineType):
       def get_name(self):
         return 'youjo'
 
@@ -207,9 +207,9 @@ class TestInlineParser(TestCase):
     eq_(token.attributes, {})
 
   def test_attribtues(self):
-    from asagami.module import InlineModule
+    from asagami.module import InlineType
 
-    class YoujoModule(InlineModule):
+    class YoujoModule(InlineType):
       def get_name(self):
         return 'youjo'
 
@@ -237,12 +237,12 @@ class TestInlineParser(TestCase):
     eq_(token.attributes, {'ninja': 'hoge', 'onaka': 'guruguru'})
 
   def test_tokenizer(self):
-    from asagami.module import InlineModule
+    from asagami.module import InlineType
     import re
 
     tokenizer = mock.MagicMock()
 
-    class YoujoModule(InlineModule):
+    class YoujoModule(InlineType):
       def get_name(self):
         return 'youjo'
 
