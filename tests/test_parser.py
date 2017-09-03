@@ -42,16 +42,16 @@ class TestBlockParser(TestCase):
     ]
     grammer = asagami.parser.Grammar()
     parser = asagami.parser.BlockParser(modules, grammer)
-    parser.parse(
+    tokens = parser.parse(
       '.. youjo\n'
       '    .. youjo: ninja\n'
       '    .. huga : gegege   \n'
     )
     eq_(
-      len(parser.tokens),
+      len(tokens),
       1,
     )
-    token = parser.tokens[0]
+    token = tokens[0]
     eq_(token.name, 'youjo')
     eq_(len(token.attributes), 2)
     eq_(token.attributes['youjo'], 'ninja')
@@ -86,7 +86,7 @@ class TestBlockParser(TestCase):
     ]
     grammer = asagami.parser.Grammar()
     parser = asagami.parser.BlockParser(modules, grammer)
-    parser.parse(
+    tokens = parser.parse(
       '.. youjo\n'
       '    .. youjo: ninja\n'
       '.. youjo\n'
@@ -94,17 +94,17 @@ class TestBlockParser(TestCase):
       '    .. huga : gegege   \n'
     )
     eq_(
-      len(parser.tokens),
+      len(tokens),
       3,
     )
-    eq_(parser.tokens[0].name, 'youjo')
-    eq_(len(parser.tokens[0].attributes), 1)
-    eq_(parser.tokens[0].attributes['youjo'], 'ninja')
-    eq_(parser.tokens[1].name, 'youjo')
-    eq_(len(parser.tokens[1].attributes), 0)
-    eq_(parser.tokens[2].name, 'ninja')
-    eq_(len(parser.tokens[2].attributes), 1)
-    eq_(parser.tokens[2].attributes['huga'], 'gegege')
+    eq_(tokens[0].name, 'youjo')
+    eq_(len(tokens[0].attributes), 1)
+    eq_(tokens[0].attributes['youjo'], 'ninja')
+    eq_(tokens[1].name, 'youjo')
+    eq_(len(tokens[1].attributes), 0)
+    eq_(tokens[2].name, 'ninja')
+    eq_(len(tokens[2].attributes), 1)
+    eq_(tokens[2].attributes['huga'], 'gegege')
 
   def test_tokenizer(self):
     from asagami.module import BlockModule

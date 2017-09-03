@@ -11,13 +11,13 @@ import abc
 from collections import OrderedDict
 import re
 
-from .module import BlockModule
+from .module import BlockModule, InlineModule
 from .token import (
   BlockTokenizer,
   InlineTokenizer,
   BlockToken,
   TokenAttributes,
-)
+  InlineToken)
 
 BlockGrammarRules = Dict[Pattern, BlockTokenizer]
 InlineGrammarRules = Dict[Pattern, InlineTokenizer]
@@ -75,9 +75,8 @@ class BlockParser(Parser):
   def __init__(
       self,
       modules: List[BlockModule],
-      grammar: Grammar = Grammar()
+      grammar: Grammar = Grammar(),
   ):
-    self.tokens = []
     self.modules = modules
     self.rules = self._gen_rules(grammar, modules)
 
@@ -111,9 +110,10 @@ class BlockParser(Parser):
 
     return tokenizer
 
-  def parse(self, text: str):
+  def parse(self, text: str)->List[BlockToken]:
+    tokens = []
     text = text.rstrip('\n')
-
+    
     while text:
       for pat, tokenizer in self.rules.items():
         result: Optional[Match] = pat.match(text)
@@ -121,8 +121,23 @@ class BlockParser(Parser):
           continue
         else:
           token = tokenizer(result)  # TODO: catch tokenizer failure
-          self.tokens.append(token)
+          tokens.append(token)
           text = text[result.end():]
           break
       else:
         raise RuntimeError('Infinite loop at: %s' % text)
+    return tokens
+
+class InlineParser(Parser):
+  tokens: List[InlineToken]
+  modules: List[InlineModule]
+  rules: InlineGrammarRules
+  
+  def __init__(
+      self,
+      modules:List[InlineModule],
+      grammar:Grammar=Grammar(),
+  ):
+    self.tokens = []
+    self.modules = modules
+    self.rules = self._gen_rules(grammar, modules)
