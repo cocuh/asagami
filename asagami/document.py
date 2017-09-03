@@ -4,4 +4,3 @@ class Document:
 
 class DocumentEnvironment:
   pass
-

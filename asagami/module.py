@@ -40,8 +40,20 @@ InlineTransformer = Callable[
 
 class Module(metaclass=abc.ABCMeta):
   @abc.abstractmethod
-  def get_block_reg_exp(self) -> List[Pattern]:
+  def get_name(self) -> str:
     pass
+
+  def get_block_types(self) -> List['BlockType']:
+    return []
+
+  def get_inline_types(self) -> List['InlineType']:
+    return []
+
+  def get_block_renderer(self) -> List['BlockRenderer']:
+    return []
+
+  def get_inline_renderer(self) -> List['InlineRenderer']:
+    return []
 
 
 class BlockType(metaclass=abc.ABCMeta):
@@ -53,8 +65,11 @@ class BlockType(metaclass=abc.ABCMeta):
   def get_patterns(self) -> List[Pattern]:
     pass
 
-  @abc.abstractmethod
   def get_tokenizer(self) -> BlockTokenizer:
+    return self.tokenizer
+
+  @abc.abstractstaticmethod
+  def tokenizer(match: Match) -> BlockToken:
     pass
 
   def get_transformer(self) -> Optional[BlockTransformer]:
@@ -70,8 +85,11 @@ class InlineType(metaclass=abc.ABCMeta):
   def get_patterns(self) -> List[Pattern]:
     pass
 
-  @abc.abstractmethod
   def get_tokenizer(self) -> InlineTokenizer:
+    return self.tokenizer
+
+  @abc.abstractstaticmethod
+  def tokenizer(match: Match) -> InlineToken:
     pass
 
   def get_transformer(self) -> Optional[InlineTransformer]:
@@ -83,8 +101,7 @@ class BlockRenderer(metaclass=abc.ABCMeta):
   def get_name(self):
     pass
 
-  @abc.abstractmethod
-  def render(self, token: BlockToken) -> Any:
+  def render_html(self, token: BlockToken, env: DocumentEnvironment) -> Any:
     pass
 
 
@@ -93,6 +110,5 @@ class InlineRenderer(metaclass=abc.ABCMeta):
   def get_name(self):
     pass
 
-  @abc.abstractmethod
-  def render(self, token: InlineToken) -> Any:
+  def render_html(self, token: InlineToken, env: DocumentEnvironment) -> Any:
     pass

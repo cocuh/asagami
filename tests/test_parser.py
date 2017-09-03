@@ -60,6 +60,10 @@ class TestBlockParser(TestCase):
 
       def get_tokenizer(self):
         return None
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
@@ -93,6 +97,10 @@ class TestBlockParser(TestCase):
 
       def get_tokenizer(self):
         return None
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     class NinjaModule(BlockType):
       def get_name(self):
@@ -103,6 +111,10 @@ class TestBlockParser(TestCase):
 
       def get_tokenizer(self):
         return None
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
@@ -144,6 +156,10 @@ class TestBlockParser(TestCase):
 
       def get_tokenizer(self):
         return tokenizer
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
@@ -188,6 +204,10 @@ class TestInlineParser(TestCase):
 
       def get_tokenizer(self):
         return None
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
@@ -218,6 +238,10 @@ class TestInlineParser(TestCase):
 
       def get_tokenizer(self):
         return None
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
@@ -253,6 +277,10 @@ class TestInlineParser(TestCase):
 
       def get_tokenizer(self):
         return tokenizer
+      
+      @staticmethod
+      def tokenizer(match):
+        pass
 
     modules = [
       YoujoModule(),
