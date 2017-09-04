@@ -79,7 +79,7 @@ class MetaDataParser:
   def __init__(self, grammar: Grammar = Grammar()):
     self.grammar = grammar
 
-  def parse(self, metadata: DocumentMetaData, text: str) -> DocumentMetaData:
+  def parse(self, metadata: DocumentMetaData, text: str) -> Tuple[DocumentMetaData, str]:
     text = text.lstrip('\n ')
     while text:
       match = self.grammar.metadata_pattern.match(text)
@@ -89,7 +89,7 @@ class MetaDataParser:
       value = match['value']
       metadata.register(name, value)
       text = text[match.end():].lstrip('\n ')
-    return metadata
+    return metadata, text
 
 
 class BlockParser:
@@ -137,7 +137,7 @@ class BlockParser:
 
     return tokenizer
 
-  def parse(self, text: str) -> Tuple[List[BlockToken], str]:
+  def parse(self, text: str) -> List[BlockToken]:
     tokens = []
     text = text.rstrip('\n')
 
@@ -153,7 +153,7 @@ class BlockParser:
           break
       else:
         raise RuntimeError('Infinite loop at: %s' % text)
-    return tokens, text
+    return tokens
 
 
 class InlineParser:
@@ -225,7 +225,7 @@ class Parser:
   def parse(self, text: str):
     metadata_parser = MetaDataParser()
     metadata = DocumentMetaData()
-    metadata, body = metadata_parser.parse(text, metadata)
+    metadata, body = metadata_parser.parse(metadata, text)
 
     block_types, inline_types = load_modules(metadata)  # TODO
 
