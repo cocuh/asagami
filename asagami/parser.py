@@ -1,11 +1,10 @@
-from typing import Dict, List, Match, Optional, Pattern, Set
+from typing import Dict, List, Match, Optional, Pattern, Set, Tuple
 
 import re
 from collections import OrderedDict
 
-from asagami.document import DocumentMetaData
-from asagami.module import BlockTokenizer, InlineTokenizer
-from .module import BlockType, InlineType
+from .document import Document, DocumentMetaData
+from .module import BlockTokenizer, BlockType, InlineTokenizer, InlineType
 from .token import BlockToken, InlineToken, TokenAttributes
 
 BlockGrammarRules = Dict[Pattern, BlockTokenizer]
@@ -96,14 +95,17 @@ class MetaDataParser:
 class BlockParser:
   types: List[BlockType]
   rules: BlockGrammarRules
+  inline_parser: 'InlineParser'
 
   def __init__(
       self,
       block_types: List[BlockType],
+      inline_parser: 'InlineParser',
       grammar: Grammar = Grammar(),
   ):
     self.types = block_types
     self.rules = self._gen_rules(grammar, block_types)
+    self.inline_parser = inline_parser
 
   @classmethod
   def _gen_rules(cls, grammer: Grammar, types: List[BlockType]) -> BlockGrammarRules:
@@ -135,7 +137,7 @@ class BlockParser:
 
     return tokenizer
 
-  def parse(self, text: str) -> List[BlockToken]:
+  def parse(self, text: str) -> Tuple[List[BlockToken], str]:
     tokens = []
     text = text.rstrip('\n')
 
@@ -151,7 +153,7 @@ class BlockParser:
           break
       else:
         raise RuntimeError('Infinite loop at: %s' % text)
-    return tokens
+    return tokens, text
 
 
 class InlineParser:
@@ -216,8 +218,30 @@ class InlineParser:
 
 
 class Parser:
-  def __init__(self, custom_modules):
-    pass
+  def __init__(self, custom_modules, grammar=Grammar()):
+    self.custom_modules = custom_modules
+    self.grammar = grammar
 
   def parse(self, text: str):
-    MetaDataParser()
+    metadata_parser = MetaDataParser()
+    metadata = DocumentMetaData()
+    metadata, body = metadata_parser.parse(text, metadata)
+
+    block_types, inline_types = load_modules(metadata)  # TODO
+
+    inline_parser = InlineParser(
+      types=inline_types,
+      grammar=self.grammar,
+    )
+    block_parser = BlockParser(
+      block_types=block_types,
+      inline_parser=inline_parser,
+      grammar=self.grammar,
+    )
+
+    block_tokens = block_parser.parse(body)
+    document = Document(
+      metadata=metadata,
+      blocks=block_tokens,
+    )
+    return document
